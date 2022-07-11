@@ -1,4 +1,5 @@
-import React , { useState, useEffect, useRef } from 'react';
+import React , { useState, useEffect, useRef, useMemo } from 'react';
+import LineChart from './LineChart';
 
 import {
   TableauViz,
@@ -10,7 +11,7 @@ const Chart = ({url, width = 800, height= 500}) => {
   const [view, setView] = useState('table');
   const [columns, setColumns] = useState([]);
 
-  const viewOptions = ['table', 'tableau']
+  const viewOptions = ['table', 'tableau', 'custom']
 
   const getUnderlyingData = async (viz) => {
     const sheet = viz.workbook.activeSheet;
@@ -29,6 +30,15 @@ const Chart = ({url, width = 800, height= 500}) => {
   viz.height = height;
   viz.width = width;
   const containerRef = useRef();
+
+  const dataReformatted = useMemo(() => {
+    return data.map((d) => {
+      return d.reduce((acc, curr, i) => {
+        acc[columns[i]._fieldName] = curr._nativeValue;
+        return acc;
+      }, {})
+    })
+  }, [data, columns])
   
   useEffect(() => {
     containerRef.current.appendChild(viz);
@@ -67,6 +77,9 @@ const Chart = ({url, width = 800, height= 500}) => {
             }
           </tbody>
         </table>
+      </div>
+      <div style={{display: `${view === 'custom' ? 'block' : 'none'}`}}>
+        <LineChart dataset={dataReformatted} width={width} height={height} xAccessor={columns[0]._fieldName} />
       </div>
     </div>
   )
