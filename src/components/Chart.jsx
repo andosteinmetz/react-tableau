@@ -69,7 +69,7 @@ const Chart = ({url, width = 800, height= 500}) => {
           <tbody>
             <tr>
               {
-                columns.map((col) => (<th key={col._fieldName.split(' ').join('-')}>{col._fieldName}</th>))
+                columns.length && columns.map((col) => (<th key={col._fieldName.split(' ').join('-')}>{col._fieldName}</th>))
               }
             </tr>
             {
@@ -79,7 +79,7 @@ const Chart = ({url, width = 800, height= 500}) => {
         </table>
       </div>
       <div style={{display: `${view === 'custom' ? 'block' : 'none'}`}}>
-        <LineChart dataset={dataReformatted} width={width} height={height} xAccessor={columns[0]._fieldName} />
+        { columns.length && <LineChart dataset={dataReformatted} width={width} height={height} xAccessor={columns[0]._fieldName} /> }
       </div>
     </div>
   )
