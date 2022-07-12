@@ -7,7 +7,7 @@ import { AxisBottom } from '@visx/axis';
 import { AxisLeft } from '@visx/axis';
 import { format } from 'date-fns';
 import { LegendOrdinal } from '@visx/legend';
-import React from 'react';
+import React, { useMemo } from 'react';
 import COLORS from '../constants/COLORS';
 
 
@@ -20,13 +20,19 @@ const ArrestsChart = ({dataset, xAccessor, width, height, margin = defaultMargin
 
   const lines = keys.map((k) => ({label: k, data: dataset.map( (d) => ({x: d[xAccessor], y: d[k]}) )} ));
 
+  const xAxisIsDate = useMemo(() => dataset[0][xAccessor] instanceof Date, [dataset, xAccessor])
+
   const getX = (d) => d.x;
   const getY = (d) => d.y;
   const getMaxY = (d) => Math.max(...keys.map((k) => d[k]));
 
-  const xScale = scaleTime({
-    domain: extent(dataset, (d) => d[xAccessor])
-  });
+  const xScale = xAxisIsDate ? 
+    scaleTime({
+      domain: extent(dataset, (d) => d[xAccessor])
+    }) : 
+    scaleLinear({
+      domain: extent(dataset, (d) => d[xAccessor])
+    });
 
   const yScale = scaleLinear({
     domain: [0, max(dataset, getMaxY)]
@@ -68,7 +74,7 @@ const ArrestsChart = ({dataset, xAccessor, width, height, margin = defaultMargin
       <AxisBottom 
         scale={xScale}
         top={yMax}
-        tickFormat={(d) => format(d, "MMM ''yy")}
+        tickFormat={ xAxisIsDate ? (d) => format(d, "MM '' yy") : (d) => d}
       />
       <AxisLeft 
         scale={yScale}
